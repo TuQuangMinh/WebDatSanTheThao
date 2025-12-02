@@ -1,0 +1,296 @@
+﻿@model web.Models.San
+
+@{
+    ViewData["Title"] = "Chỉnh sửa sân thể thao";
+}
+
+<div class="container-fluid py-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-10 col-xl-8">
+            <!-- Header Section -->
+            <div class="card border-0 shadow-lg mb-4">
+                <div class="card-header bg-gradient-primary text-white py-4">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h2 class="mb-1 fw-bold">
+                                <i class="fas fa-edit me-2"></i>Chỉnh sửa sân thể thao
+                            </h2>
+                            <p class="mb-0 opacity-90">Cập nhật thông tin chi tiết về sân của bạn</p>
+                        </div>
+                        <div class="text-end">
+                            <a asp-action="Index" class="btn btn-outline-light">
+                                <i class="fas fa-arrow-left me-1"></i>Quay lại
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Main Form -->
+            <form asp-action="Edit" enctype="multipart/form-data" class="needs-validation" novalidate>
+                <div asp-validation-summary="ModelOnly" class="alert alert-danger d-none"></div>
+                <input type="hidden" asp-for="Id" />
+
+                <div class="row g-4">
+                    <!-- Left Column - Basic Information -->
+                    <div class="col-lg-8">
+                        <div class="card border-0 shadow-sm h-100">
+                            <div class="card-header bg-light border-bottom-0 py-3">
+                                <h5 class="mb-0 text-primary fw-semibold">
+                                    <i class="fas fa-info-circle me-2"></i>Thông tin cơ bản
+                                </h5>
+                            </div>
+                            <div class="card-body p-4">
+                                <!-- Name Field -->
+                                <div class="form-floating mb-4">
+                                    <input asp-for="Name" class="form-control form-control-lg" placeholder="Tên sân" />
+                                    <label asp-for="Name" class="text-muted">
+                                        <i class="fas fa-futbol me-1"></i>Tên sân thể thao
+                                    </label>
+                                    <span asp-validation-for="Name" class="text-danger small"></span>
+                                </div>
+
+                                <!-- Location Field -->
+                                <div class="form-floating mb-4">
+                                    <input asp-for="Location" class="form-control form-control-lg" placeholder="Địa chỉ" />
+                                    <label asp-for="Location" class="text-muted">
+                                        <i class="fas fa-map-marker-alt me-1"></i>Địa chỉ
+                                    </label>
+                                    <span asp-validation-for="Location" class="text-danger small"></span>
+                                </div>
+
+                                <!-- Price Field -->
+                                <div class="form-floating mb-4">
+                                    <input asp-for="PricePerHour" class="form-control form-control-lg" type="number" step="0.01" placeholder="Giá thuê" />
+                                    <label asp-for="PricePerHour" class="text-muted">
+                                        <i class="fas fa-money-bill-wave me-1"></i>Giá thuê (VNĐ/giờ)
+                                    </label>
+                                    <span asp-validation-for="PricePerHour" class="text-danger small"></span>
+                                </div>
+
+                                <!-- Operating Hours -->
+                                <div class="row mb-4">
+                                    <div class="col-md-6">
+                                        <div class="form-floating mb-3">
+                                            <input type="time" name="operatingStartTime" class="form-control form-control-lg" value="@Model.OperatingStartTime.ToString(@"hh\:mm")" required />
+                                            <label class="text-muted">
+                                                <i class="fas fa-play me-1"></i>Giờ mở cửa
+                                            </label>
+                                            <span class="text-danger small" asp-validation-for="OperatingStartTime"></span>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="form-floating mb-3">
+                                            <input type="time" name="operatingEndTime" class="form-control form-control-lg" value="@Model.OperatingEndTime.ToString(@"hh\:mm")" required />
+                                            <label class="text-muted">
+                                                <i class="fas fa-stop me-1"></i>Giờ đóng cửa
+                                            </label>
+                                            <span class="text-danger small" asp-validation-for="OperatingEndTime"></span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Cover Field -->
+                                <div class="form-floating mb-4">
+                                    <select asp-for="Cover" class="form-select form-select-lg">
+                                        <option value="">Chọn loại mái che</option>
+                                        <option value="Có mái che" selected="@(Model.Cover == "Có mái che")">Có mái che</option>
+                                        <option value="Không mái che" selected="@(Model.Cover == "Không mái che")">Không mái che</option>
+                                        <option value="Mái che một phần" selected="@(Model.Cover == "Mái che một phần")">Mái che một phần</option>
+                                    </select>
+                                    <label asp-for="Cover" class="text-muted">
+                                        <i class="fas fa-umbrella me-1"></i>Mái che
+                                    </label>
+                                    <span asp-validation-for="Cover" class="text-danger small"></span>
+                                </div>
+
+                                <!-- Category Field -->
+                                <div class="form-floating mb-0">
+                                    <select asp-for="CategoryId" class="form-select form-select-lg">
+                                        <option value="">Chọn loại sân</option>
+                                        @foreach (var category in ViewBag.Categories)
+                                        {
+                                            <option value="@category.Id" selected="@(category.Id == Model.CategoryId ? "selected" : null)">@category.Name</option>
+                                        }
+                                    </select>
+                                    <label asp-for="CategoryId" class="text-muted">
+                                        <i class="fas fa-tags me-1"></i>Loại sân
+                                    </label>
+                                    <span asp-validation-for="CategoryId" class="text-danger small"></span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Right Column - Images -->
+                    <div class="col-lg-4">
+                        <div class="card border-0 shadow-sm h-100">
+                            <div class="card-header bg-light border-bottom-0 py-3">
+                                <h5 class="mb-0 text-primary fw-semibold">
+                                    <i class="fas fa-camera me-2"></i>Hình ảnh sân
+                                </h5>
+                            </div>
+                            <div class="card-body p-4">
+                                <!-- Upload New Images -->
+                                <div class="mb-4">
+                                    <label for="imageFiles" class="form-label fw-semibold mb-3">
+                                        <i class="fas fa-cloud-upload-alt me-1"></i>Thêm hình ảnh mới
+                                    </label>
+                                    <div class="upload-area border border-2 border-dashed rounded-3 p-4 text-center bg-light">
+                                        <input type="file" name="imageFiles" multiple class="form-control d-none" id="imageFiles" accept="image/*" />
+                                        <label for="imageFiles" class="upload-label cursor-pointer">
+                                            <i class="fas fa-cloud-upload-alt fa-2x text-primary mb-2"></i>
+                                            <p class="mb-1 fw-semibold">Kéo thả hoặc click để chọn</p>
+                                            <p class="small text-muted mb-0">PNG, JPG, GIF (tối đa 5MB mỗi file)</p>
+                                        </label>
+                                    </div>
+                                    <span class="text-danger small" asp-validation-for="Images"></span>
+                                </div>
+
+                                <!-- Current Images -->
+                                <div>
+                                    <label class="form-label fw-semibold mb-3">
+                                        <i class="fas fa-images me-1"></i>Hình ảnh hiện tại
+                                    </label>
+                                    <div class="current-images">
+                                        @if (Model.Images != null && Model.Images.Any())
+                                        {
+                                            <div class="row g-2">
+                                                @foreach (var image in Model.Images)
+                                                {
+                                                    <div class="col-6">
+                                                        <div class="image-item position-relative">
+                                                            <img src="@image.Url" alt="Hình ảnh sân" class="img-fluid rounded shadow-sm" style="height: 80px; object-fit: cover; width: 100%;" />
+                                                            <button type="button" class="btn btn-danger btn-sm position-absolute top-0 end-0 m-1 rounded-circle" style="width: 24px; height: 24px; padding: 0;">
+                                                                <i class="fas fa-times small"></i>
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                }
+                                            </div>
+                                        }
+                                        else
+                                        {
+                                            <div class="text-center text-muted py-4">
+                                                <i class="fas fa-image fa-2x mb-2"></i>
+                                                <p class="mb-0">Chưa có hình ảnh nào</p>
+                                            </div>
+                                        }
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="row mt-4">
+                    <div class="col-12">
+                        <div class="card border-0 shadow-sm">
+                            <div class="card-body p-4">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div class="d-flex gap-3">
+                                        <button type="submit" class="btn btn-primary btn-lg px-4">
+                                            <i class="fas fa-save me-2"></i>Lưu thay đổi
+                                        </button>
+                                        <a asp-action="Preview" asp-route-id="@Model.Id" class="btn btn-outline-info btn-lg px-4">
+                                            <i class="fas fa-eye me-2"></i>Xem trước
+                                        </a>
+                                    </div>
+                                    <div>
+                                        <a asp-action="Index" class="btn btn-outline-secondary btn-lg px-4">
+                                            <i class="fas fa-times me-2"></i>Hủy bỏ
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Custom Styles -->
+<style>
+    .bg-gradient-primary {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    }
+
+    .upload-area {
+        transition: all 0.3s ease;
+        cursor: pointer;
+    }
+
+        .upload-area:hover {
+            border-color: #667eea !important;
+            background-color: #f8f9ff !important;
+        }
+
+    .cursor-pointer {
+        cursor: pointer !important;
+    }
+
+    .image-item {
+        transition: transform 0.2s ease;
+    }
+
+        .image-item:hover {
+            transform: translateY(-2px);
+        }
+
+    .card {
+        transition: box-shadow 0.3s ease;
+    }
+
+        .card:hover {
+            box-shadow: 0 8px 25px rgba(0,0,0,0.1) !important;
+        }
+
+    .form-control:focus, .form-select:focus {
+        border-color: #667eea;
+        box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+    }
+
+    .btn-primary {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border: none;
+    }
+
+        .btn-primary:hover {
+            background: linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%);
+            transform: translateY(-1px);
+        }
+</style>
+
+@section Scripts {
+    <script src="~/lib/jquery-validation/dist/jquery.validate.min.js"></script>
+    <script src="~/lib/jquery-validation-unobtrusive/jquery.validate.unobtrusive.min.js"></script>
+
+    <!-- Custom JavaScript -->
+    <script>
+        $(document).ready(function() {
+            // File upload preview
+            $('#imageFiles').on('change', function() {
+                const files = this.files;
+                if (files.length > 0) {
+                    $('.upload-area').addClass('border-success').removeClass('border-dashed');
+                    $('.upload-label p:first-child').text(files.length + ' file(s) đã chọn');
+                }
+            });
+
+            // Form validation styling
+            $('form').on('submit', function() {
+                $(this).addClass('was-validated');
+            });
+
+            // Smooth scroll to validation errors
+            if ($('.text-danger:visible').length > 0) {
+                $('html, body').animate({
+                    scrollTop: $('.text-danger:visible').first().offset().top - 100
+                }, 500);
+            }
+        });
+    </script>
+}

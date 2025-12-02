@@ -1,0 +1,170 @@
+﻿@model web.Models.San
+@using web.Models
+@using System.Linq
+
+@{
+    ViewData["Title"] = "Chi tiết sân";
+
+    var slots = (IEnumerable<BookingSlot>)ViewBag.AvailableSlots ?? Enumerable.Empty<BookingSlot>();
+    var baseDate = (DateTime)ViewBag.StartDate;
+
+    // 7 ngày: baseDate → baseDate+6
+    var days = Enumerable.Range(0, 7)
+        .Select(offset => baseDate.Date.AddDays(offset))
+        .ToList();
+
+    // Các mốc giờ theo giờ hoạt động
+    var slotDuration = TimeSpan.FromHours(1);
+    var times = new List<TimeSpan>();
+    for (var t = Model.OperatingStartTime; t < Model.OperatingEndTime; t = t.Add(slotDuration))
+    {
+        times.Add(t);
+    }
+
+    var today = DateTime.Today;
+    var nowTime = DateTime.Now.TimeOfDay;
+}
+
+<div class="container mt-4">
+    <h2 class="fw-bold">@Model.Name</h2>
+    <p class="text-muted">@Model.Location</p>
+    <p><strong>Giá:</strong> @Model.PricePerHour.ToString("N0") đ/giờ</p>
+    <p><strong>Giờ hoạt động:</strong> @Model.OperatingStartTime.ToString(@"hh\:mm") - @Model.OperatingEndTime.ToString(@"hh\:mm")</p>
+
+    <hr />
+
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <a class="btn btn-outline-secondary btn-sm"
+           href="@Url.Action("Detail", "San", new { id = Model.Id, startDate = baseDate.AddDays(-7).ToString("yyyy-MM-dd") })">
+            &laquo; Tuần trước
+        </a>
+
+        <span class="fw-bold">
+            @baseDate.ToString("dd/MM/yyyy") - @baseDate.AddDays(6).ToString("dd/MM/yyyy")
+        </span>
+
+        <a class="btn btn-outline-secondary btn-sm"
+           href="@Url.Action("Detail", "San", new { id = Model.Id, startDate = baseDate.AddDays(7).ToString("yyyy-MM-dd") })">
+            Tuần sau &raquo;
+        </a>
+    </div>
+
+    <h4 class="fw-bold mb-3">Lịch đặt sân theo tuần</h4>
+
+    <form method="post" action="/Booking/AddToCart" id="bookingForm">
+        <input type="hidden" name="sanId" value="@Model.Id" />
+
+        <div class="table-responsive">
+            <table class="table table-bordered text-center align-middle">
+                <thead class="table-dark">
+                    <tr>
+                        <th>Giờ</th>
+                        @foreach (var day in days)
+                        {
+                            <th>@day.ToString("dd/MM")</th>
+                        }
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var time in times)
+                    {
+                        <tr>
+                            <td>
+                                @time.ToString(@"hh\:mm") - @time.Add(slotDuration).ToString(@"hh\:mm")
+                            </td>
+
+                            @foreach (var day in days)
+                            {
+                                // Tìm slot tương ứng (nếu có)
+                                var slot = slots.FirstOrDefault(s =>
+                                s.BookingDate.Date == day &&
+                                s.StartTime == time);
+
+                                if (slot == null)
+                                {
+                                    <td class="text-muted">-</td>
+                                }
+                                else
+                                {
+                                    bool isPast =
+                                    day < today ||
+                                    (day == today && slot.EndTime <= nowTime);
+
+                                    <td>
+                                        @if (slot.Status == BookingStatus.Booked)
+                                        {
+                                            <div class="text-danger fw-bold">ĐÃ ĐẶT</div>
+                                        }
+                                        else if (isPast)
+                                        {
+                                            <div class="text-secondary fw-bold">HẾT GIỜ</div>
+                                        }
+                                        else
+                                        {
+                                            <div class="text-success fw-bold">TRỐNG</div>
+                                            <input type="checkbox"
+                                                   class="form-check-input slot-checkbox"
+                                                   data-date="@day.ToString("yyyy-MM-dd")"
+                                                   data-start="@slot.StartTime.ToString(@"hh\:mm")"
+                                                   data-end="@slot.EndTime.ToString(@"hh\:mm")" />
+                                        }
+                                    </td>
+                                }
+                            }
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+
+        <!-- chỗ này JS sẽ inject các input bookingDate[] / startTime[] / endTime[] -->
+        <div id="selectedSlotsContainer"></div>
+
+        <button type="submit" class="btn btn-primary mt-3">Đặt sân</button>
+        <a href="/San" class="btn btn-outline-secondary mt-3">Quay lại</a>
+    </form>
+</div>
+
+@section Scripts {
+    <script>
+        (function () {
+            const form = document.getElementById("bookingForm");
+            const container = document.getElementById("selectedSlotsContainer");
+
+            form.addEventListener("submit", function (e) {
+                container.innerHTML = "";
+
+                const selected = document.querySelectorAll(".slot-checkbox:checked");
+                if (selected.length === 0) {
+                    e.preventDefault();
+                    alert("Vui lòng chọn ít nhất một khung giờ.");
+                    return;
+                }
+
+                selected.forEach(cb => {
+                    const date = cb.dataset.date;
+                    const start = cb.dataset.start;
+                    const end = cb.dataset.end;
+
+                    const inputDate = document.createElement("input");
+                    inputDate.type = "hidden";
+                    inputDate.name = "bookingDate";
+                    inputDate.value = date;
+                    container.appendChild(inputDate);
+
+                    const inputStart = document.createElement("input");
+                    inputStart.type = "hidden";
+                    inputStart.name = "startTime";
+                    inputStart.value = start;
+                    container.appendChild(inputStart);
+
+                    const inputEnd = document.createElement("input");
+                    inputEnd.type = "hidden";
+                    inputEnd.name = "endTime";
+                    inputEnd.value = end;
+                    container.appendChild(inputEnd);
+                });
+            });
+        })();
+    </script>
+}

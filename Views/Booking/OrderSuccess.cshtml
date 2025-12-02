@@ -1,0 +1,52 @@
+﻿@{
+    ViewData["Title"] = "Đặt sân thành công";
+}
+
+<div class="container mt-5 mb-5 text-center">
+    <div class="card shadow-sm border-0" style="border-radius: 20px; max-width: 600px; margin: auto;">
+        <div class="card-body p-5">
+            <i class="fas fa-check-circle fa-4x text-success mb-4"></i>
+            <h2 class="mb-3">Đặt sân thành công!</h2>
+            <p class="text-muted mb-4">Cảm ơn bạn đã đặt sân! Đơn hàng của bạn đã được xác nhận.</p>
+
+            <div class="alert alert-info text-start">
+                <h5 class="alert-heading"><i class="fas fa-info-circle"></i> Chi tiết đơn hàng</h5>
+                <p class="mb-2"><strong>Mã đơn hàng:</strong> @ViewBag.OrderId</p>
+                <p class="mb-2"><strong>Ngày đặt:</strong> @ViewBag.OrderDate</p>
+                <p class="mb-2"><strong>Tổng tiền:</strong> @ViewBag.TotalPrice VNĐ</p>
+                <p class="mb-0"><strong>Số lượng sân:</strong> @ViewBag.BookingCount</p>
+            </div>
+
+            <p class="text-muted mb-4">Chúng tôi đã gửi thông tin chi tiết đơn hàng đến email của bạn.</p>
+
+            <div class="d-flex justify-content-center gap-3">
+                <a asp-controller="San" asp-action="Index" class="btn btn-primary rounded-pill px-4">
+                    <i class="fas fa-home me-2"></i> Quay về trang chủ
+                </a>
+                <a asp-controller="San" asp-action="Index" class="btn btn-outline-primary rounded-pill px-4">
+                    <i class="fas fa-futbol me-2"></i> Đặt sân khác
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .card {
+        background: linear-gradient(45deg, #f8f9fa, #ffffff);
+    }
+
+    .btn-primary {
+        background-color: #667eea;
+        border-color: #667eea;
+    }
+
+        .btn-primary:hover {
+            background-color: #5a6fd8;
+            border-color: #5a6fd8;
+        }
+
+    .alert-info {
+        border-radius: 10px;
+    }
+</style>

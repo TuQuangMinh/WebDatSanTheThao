@@ -1,0 +1,264 @@
+﻿@model web.Models.San
+@{
+    ViewData["Title"] = "Chi tiết sân";
+    var category = ViewBag.Category as web.Models.Category;
+    var availableSlots = ViewBag.AvailableSlots as IEnumerable<web.Models.BookingSlot> ?? new List<web.Models.BookingSlot>();
+    var startDate = ViewBag.StartDate as DateTime? ?? DateTime.Today;
+    var slotDuration = TimeSpan.FromHours(1);
+    var daysToDisplay = 7;
+
+    // Tạo danh sách khung giờ cho mỗi ngày
+    var dailySlots = new Dictionary<DateTime, List<web.Models.BookingSlot>>();
+    for (int i = 0; i < daysToDisplay; i++)
+    {
+        var date = startDate.AddDays(i);
+        dailySlots[date] = new List<web.Models.BookingSlot>();
+        for (var time = Model.OperatingStartTime; time < Model.OperatingEndTime; time = time.Add(slotDuration))
+        {
+            var slot = availableSlots.FirstOrDefault(s => s.BookingDate.Date == date.Date && s.StartTime == time);
+            dailySlots[date].Add(new web.Models.BookingSlot
+                    {
+                        SanId = Model.Id,
+                        BookingDate = date,
+                        StartTime = time,
+                        EndTime = time.Add(slotDuration),
+                        Status = slot != null ? slot.Status : BookingStatus.Booked
+                    });
+        }
+    }
+}
+
+<div class="container mt-5 mb-5">
+    <div class="card shadow-sm border-0" style="border-radius: 20px;">
+        <div class="card-body p-5">
+            <div class="row">
+                <!-- San Images -->
+                <div class="col-md-6">
+                    @if (Model.Images != null && Model.Images.Any())
+                    {
+                        <div id="sanImages" class="carousel slide" data-bs-ride="carousel">
+                            <div class="carousel-inner">
+                                @foreach (var image in Model.Images.Select((value, i) => new { value, i }))
+                                {
+                                    <div class="carousel-item @(image.i == 0 ? "active" : "")">
+                                        <img src="@image.value.Url" class="d-block w-100" style="border-radius: 15px; height: 400px; object-fit: cover;" alt="@Model.Name">
+                                    </div>
+                                }
+                            </div>
+                            <button class="carousel-control-prev" type="button" data-bs-target="#sanImages" data-bs-slide="prev">
+                                <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                                <span class="visually-hidden">Previous</span>
+                            </button>
+                            <button class="carousel-control-next" type="button" data-bs-target="#sanImages" data-bs-slide="next">
+                                <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                                <span class="visually-hidden">Next</span>
+                            </button>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="text-center bg-light p-5" style="border-radius: 15px;">
+                            <i class="fas fa-image fa-3x text-muted"></i>
+                            <p class="text-muted">Không có hình ảnh</p>
+                        </div>
+                    }
+                </div>
+
+                <!-- San Details -->
+                <div class="col-md-6">
+                    <h2 class="mb-3">@Model.Name</h2>
+                    <p class="text-muted mb-2"><i class="fas fa-map-marker-alt me-2"></i>@Model.Location</p>
+                    <p class="text-muted mb-2"><i class="fas fa-tag me-2"></i>@(category?.Name ?? "Chưa phân loại")</p>
+                    <h4 class="text-primary mb-4">@Model.PricePerHour.ToString("N0") VNĐ/giờ</h4>
+                    @if (!string.IsNullOrEmpty(Model.Cover))
+                    {
+                        <p class="text-muted">@Model.Cover</p>
+                    }
+                    <div class="mt-4">
+                        <h5>Giờ hoạt động</h5>
+                        <p>@Model.OperatingStartTime.ToString(@"hh\:mm") - @Model.OperatingEndTime.ToString(@"hh\:mm")</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Booking Form -->
+            <div class="mt-5">
+                <h4 class="mb-4"><i class="fas fa-calendar-plus"></i> Đặt sân</h4>
+                <form asp-controller="Booking" asp-action="AddToCart" method="post" id="bookingForm">
+                    <input type="hidden" name="sanId" value="@Model.Id" />
+                    <div class="mb-4">
+                        <label class="form-label">Chọn khoảng thời gian</label>
+                        <div class="d-flex justify-content-between mb-3">
+                            <a href="@Url.Action("Detail", new { id = Model.Id, startDate = startDate.AddDays(-7) })" class="btn btn-outline-secondary">
+                                <i class="fas fa-chevron-left"></i> Trước
+                            </a>
+                            <span class="align-self-center">Từ @startDate.ToString("dd/MM/yyyy") đến @(startDate.AddDays(6).ToString("dd/MM/yyyy"))</span>
+                            <a href="@Url.Action("Detail", new { id = Model.Id, startDate = startDate.AddDays(7) })" class="btn btn-outline-secondary">
+                                Sau <i class="fas fa-chevron-right"></i>
+                            </a>
+                        </div>
+                    </div>
+
+                    <!-- Tabs cho từng ngày -->
+                    <ul class="nav nav-tabs mb-4" id="dayTabs" role="tablist">
+                        @foreach (var day in dailySlots.Keys.Select((date, i) => new { date, i }))
+                        {
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link @(day.i == 0 ? "active" : "")" id="day-@day.i-tab" data-bs-toggle="tab"
+                                        data-bs-target="#day-@day.i" type="button" role="tab" aria-controls="day-@day.i"
+                                        aria-selected="@(day.i == 0 ? "true" : "false")">
+                                    @day.date.ToString("dd/MM (ddd)")
+                                </button>
+                            </li>
+                        }
+                    </ul>
+
+                    <div class="tab-content" id="dayTabContent">
+                        @foreach (var day in dailySlots.Keys.Select((date, i) => new { date, i }))
+                        {
+                            <div class="tab-pane fade @(day.i == 0 ? "show active" : "")" id="day-@day.i" role="tabpanel" aria-labelledby="day-@day.i-tab">
+                                <div class="table-responsive">
+                                    <table class="table table-bordered text-center">
+                                        <thead class="table-dark">
+                                            <tr>
+                                                <th>Khung giờ</th>
+                                                <th>Trạng thái</th>
+                                                <th>Chọn</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            @foreach (var slot in dailySlots[day.date])
+                                            {
+                                                var isAvailable = slot.Status == BookingStatus.Available;
+                                                <tr class="@(isAvailable ? "" : "table-danger")">
+                                                    <td>@slot.StartTime.ToString(@"hh\:mm") - @slot.EndTime.ToString(@"hh\:mm")</td>
+                                                    <td>@(isAvailable ? "Khả dụng" : "Đã đặt")</td>
+                                                    <td>
+                                                        @if (isAvailable)
+                                                        {
+                                                            <input type="checkbox" name="slotTimes" value="@slot.BookingDate.ToString("yyyy-MM-dd")|@slot.StartTime.ToString(@"hh\:mm")"
+                                                                   class="slot-checkbox" data-date="@slot.BookingDate.ToString("yyyy-MM-dd")" />
+                                                        }
+                                                        else
+                                                        {
+                                                            <span class="text-muted">Khóa</span>
+                                                        }
+                                                    </td>
+                                                </tr>
+                                            }
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        }
+                    </div>
+
+                    <div class="mt-4">
+                        <button type="submit" class="btn btn-primary btn-lg" id="submitBtn">
+                            <i class="fas fa-cart-plus"></i> Thêm vào giỏ
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        document.getElementById('bookingForm').addEventListener('submit', function (e) {
+            const checkboxes = document.querySelectorAll('.slot-checkbox:checked');
+            if (checkboxes.length === 0) {
+                e.preventDefault();
+                alert('Vui lòng chọn ít nhất một khung giờ!');
+                return;
+            }
+
+            // Nhóm các slot theo ngày
+            const slotsByDate = {};
+            checkboxes.forEach(cb => {
+                const [date, time] = cb.value.split('|');
+                if (!slotsByDate[date]) slotsByDate[date] = [];
+                slotsByDate[date].push(time);
+            });
+
+            // Kiểm tra mỗi ngày: slot phải liên tiếp
+            for (const date in slotsByDate) {
+                const times = slotsByDate[date].sort();
+                for (let i = 1; i < times.length; i++) {
+                    const currentTime = new Date(`2000-01-01 ${times[i]}`);
+                    const prevTime = new Date(`2000-01-01 ${times[i - 1]}`);
+                    const diffMinutes = (currentTime - prevTime) / 1000 / 60;
+                    if (diffMinutes !== 60) {
+                        e.preventDefault();
+                        alert(`Các khung giờ ngày ${date} phải liên tiếp!`);
+                        return;
+                    }
+                }
+
+                // Thêm input ẩn cho mỗi ngày
+                const startTime = times[0];
+                let endTime = new Date(`2000-01-01 ${times[times.length - 1]}`);
+                endTime.setHours(endTime.getHours() + 1);
+                const endTimeStr = endTime.toTimeString().slice(0, 5);
+
+                const form = e.target;
+                const bookingDateInput = document.createElement('input');
+                bookingDateInput.type = 'hidden';
+                bookingDateInput.name = 'bookingDate';
+                bookingDateInput.value = date;
+                form.appendChild(bookingDateInput);
+
+                const startTimeInput = document.createElement('input');
+                startTimeInput.type = 'hidden';
+                startTimeInput.name = 'startTime';
+                startTimeInput.value = startTime;
+                form.appendChild(startTimeInput);
+
+                const endTimeInput = document.createElement('input');
+                endTimeInput.type = 'hidden';
+                endTimeInput.name = 'endTime';
+                endTimeInput.value = endTimeStr;
+                form.appendChild(endTimeInput);
+            }
+        });
+    </script>
+
+    <style>
+        .card {
+            background: linear-gradient(45deg, #f8f9fa, #ffffff);
+        }
+
+        .btn-primary {
+            background-color: #667eea;
+            border-color: #667eea;
+        }
+
+            .btn-primary:hover {
+                background-color: #5a6fd8;
+                border-color: #5a6fd8;
+            }
+
+        .table-danger {
+            background-color: #f8d7da;
+        }
+
+        .table-bordered td, .table-bordered th {
+            border: 1px solid #dee2e6;
+        }
+
+        .slot-checkbox {
+            transform: scale(1.5);
+        }
+
+        .nav-tabs .nav-link.active {
+            background-color: #667eea;
+            color: white;
+            border-color: #667eea;
+        }
+
+        .nav-tabs .nav-link {
+            border-radius: 5px;
+        }
+    </style>
+}

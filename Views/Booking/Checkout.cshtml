@@ -1,0 +1,182 @@
+﻿@model web.Models.Order
+
+@{
+    ViewData["Title"] = "Thanh toán";
+    var bookingItems = ViewBag.BookingItems as List<web.Models.BookingItem> ?? new List<web.Models.BookingItem>();
+    var totalPrice = ViewBag.TotalPrice as decimal? ?? 0m;
+}
+
+<div class="container mt-4 mb-5">
+    <div class="row">
+        <!-- Booking Details -->
+        <div class="col-md-8">
+            <h2 class="mb-4"><i class="fas fa-credit-card"></i> Thanh toán</h2>
+
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-light">
+                    <h4><i class="fas fa-list"></i> Chi tiết đặt sân</h4>
+                </div>
+                <div class="card-body">
+                    @if (bookingItems.Any())
+                    {
+                        <div class="table-responsive">
+                            <table class="table table-striped align-middle">
+                                <thead class="table-dark">
+                                    <tr>
+                                        <th>Tên sân</th>
+                                        <th>Ngày đặt</th>
+                                        <th>Thời gian</th>
+                                        <th class="text-end">Giá</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var item in bookingItems.OrderBy(i => i.BookingDate).ThenBy(i => i.StartTime))
+                                    {
+                                        <tr>
+                                            <td><strong>@(item.San != null ? item.San.Name : "Không có tên sân")</strong></td>
+                                            <td>@item.BookingDate.ToString("dd/MM/yyyy")</td>
+                                            <td>@item.StartTime.ToString(@"hh\:mm") - @item.EndTime.ToString(@"hh\:mm")</td>
+                                            <td class="text-end">@item.TotalPrice.ToString("N0") VNĐ</td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="text-end">
+                            <h4 class="text-primary">
+                                <strong>Tổng tiền: @totalPrice.ToString("N0") VNĐ</strong>
+                            </h4>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="alert alert-warning">
+                            <i class="fas fa-exclamation-triangle"></i>
+                            Giỏ đặt sân của bạn đang trống.
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+
+        <!-- Order Confirmation -->
+        <div class="col-md-4">
+            <div class="card shadow-sm">
+                <div class="card-header bg-light">
+                    <h4><i class="fas fa-file-invoice"></i> Xác nhận đơn hàng</h4>
+                </div>
+                <div class="card-body">
+                    <form asp-action="Checkout" method="post" id="checkoutForm">
+                        <div asp-validation-summary="ModelOnly" class="alert alert-danger"></div>
+
+                        <div class="mb-3">
+                            <label asp-for="OrderDate" class="form-label">
+                                <i class="fas fa-calendar"></i> Ngày đặt
+                            </label>
+                            <input asp-for="OrderDate" class="form-control" type="datetime-local"
+                                   readonly value="@DateTime.Now.ToString("yyyy-MM-ddTHH:mm")" />
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">
+                                <i class="fas fa-money-bill"></i> Tổng tiền
+                            </label>
+                            <input type="text" class="form-control" readonly
+                                   value="@totalPrice.ToString("N0") VNĐ" />
+                            <input asp-for="TotalPrice" type="hidden" value="@totalPrice" />
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">
+                                <i class="fas fa-credit-card"></i> Phương thức thanh toán
+                            </label>
+                            <select class="form-select" name="paymentMethod" required>
+                                <option value="">Chọn phương thức thanh toán</option>
+                                <option value="cash">Tiền mặt tại sân</option>
+                                <option value="transfer">Chuyển khoản</option>
+                                <option value="momo">Ví MoMo</option>
+                            </select>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Ghi chú (tùy chọn)</label>
+                            <textarea class="form-control" rows="3" name="note" placeholder="Nhập ghi chú nếu có..."></textarea>
+                        </div>
+
+                        <hr>
+
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-success btn-lg" id="confirmBtn">
+                                <i class="fas fa-check-circle"></i> Xác nhận đặt sân
+                            </button>
+                            <a href="@Url.Action("Index")" class="btn btn-outline-secondary">
+                                <i class="fas fa-arrow-left"></i> Quay lại giỏ hàng
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+
+    <script>
+        document.getElementById('checkoutForm').addEventListener('submit', function (e) {
+            const btn = document.getElementById('confirmBtn');
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Đang xử lý...';
+            btn.disabled = true;
+        });
+
+        document.getElementById('confirmBtn').addEventListener('click', function (e) {
+            const paymentMethod = document.querySelector('select[name="paymentMethod"]').value;
+            if (!paymentMethod) {
+                e.preventDefault();
+                alert('Vui lòng chọn phương thức thanh toán!');
+                const btn = document.getElementById('confirmBtn');
+                btn.innerHTML = '<i class="fas fa-check-circle"></i> Xác nhận đặt sân';
+                btn.disabled = false;
+                return;
+            }
+
+            if (!confirm('Bạn có chắc chắn muốn xác nhận đặt sân này không?')) {
+                e.preventDefault();
+                const btn = document.getElementById('confirmBtn');
+                btn.innerHTML = '<i class="fas fa-check-circle"></i> Xác nhận đặt sân';
+                btn.disabled = false;
+            }
+        });
+    </script>
+
+    <style>
+        .card {
+            box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+            border: 1px solid rgba(0, 0, 0, 0.125);
+            border-radius: 15px;
+        }
+
+        .card-header {
+            background-color: #f8f9fa;
+            font-weight: 600;
+            border-radius: 15px 15px 0 0;
+        }
+
+        .table-dark th {
+            background-color: #343a40;
+        }
+
+        .btn-success {
+            background-color: #28a745;
+            border-color: #28a745;
+        }
+
+            .btn-success:hover {
+                background-color: #218838;
+                border-color: #1e7e34;
+            }
+    </style>
+}

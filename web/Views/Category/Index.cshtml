@@ -1,0 +1,38 @@
+﻿@model IEnumerable<web.Models.Category>
+
+@{
+    ViewData["Title"] = "Danh sách môn thể thao";
+}
+
+<h1>Danh sách môn thể thao</h1>
+
+@if (User.IsInRole("Admin"))
+{
+    <p>
+        <a asp-action="Create" class="btn btn-primary">Tạo mới</a>
+    </p>
+}
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>Tên môn thể thao</th>
+            <th>Hành động</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var category in Model)
+        {
+            <tr>
+                <td>@category.Name</td>
+                <td>
+                    @if (User.IsInRole("Admin"))
+                    {
+                        <a asp-action="Edit" asp-route-id="@category.Id">Sửa</a> 
+                    <a asp-action="Delete" asp-route-id="@category.Id"> Xóa </a>
+                    }
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

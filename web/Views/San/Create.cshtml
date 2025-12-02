@@ -1,0 +1,334 @@
+﻿@model web.Models.San
+
+@{
+    ViewData["Title"] = "Tạo sân mới";
+}
+
+<div class="container-fluid py-4" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); min-height: 100vh;">
+    <div class="row justify-content-center">
+        <div class="col-lg-8 col-xl-7">
+            <div class="card shadow-lg border-0" style="border-radius: 20px; backdrop-filter: blur(10px); background: rgba(255, 255, 255, 0.95);">
+                <div class="card-header text-center py-4" style="background: linear-gradient(135deg, #28a745, #20c997); border-radius: 20px 20px 0 0; border: none;">
+                    <div class="d-flex align-items-center justify-content-center mb-2">
+                        <i class="fas fa-futbol fa-2x text-white me-3"></i>
+                        <h2 class="text-white mb-0 fw-bold">Tạo Sân Thể Thao Mới</h2>
+                    </div>
+                    <p class="text-white-50 mb-0">Thêm sân thể thao vào hệ thống</p>
+                </div>
+
+                <div class="card-body p-5">
+                    <form asp-action="Create" method="post" enctype="multipart/form-data">
+                        <div asp-validation-summary="All" class="alert alert-danger rounded-pill mb-4" style="display: none;"></div>
+
+                        <!-- Thông tin cơ bản -->
+                        <div class="section-header mb-4">
+                            <h5 class="fw-bold text-success mb-3">
+                                <i class="fas fa-info-circle me-2"></i>Thông tin cơ bản
+                            </h5>
+                        </div>
+
+                        <div class="row mb-4">
+                            <div class="col-md-6">
+                                <div class="form-floating mb-3">
+                                    <input asp-for="Name" class="form-control border-2" id="nameInput" placeholder="Tên sân" style="border-radius: 15px; border-color: #28a745;" />
+                                    <label for="nameInput" class="text-success fw-semibold">
+                                        <i class="fas fa-tag me-1"></i>Tên sân
+                                    </label>
+                                    <span asp-validation-for="Name" class="text-danger small"></span>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-floating mb-3">
+                                    <select asp-for="CategoryId" class="form-select border-2" id="categorySelect" style="border-radius: 15px; border-color: #28a745;" asp-items="@(new SelectList(ViewBag.Categories, "Id", "Name"))">
+                                        <option value="">-- Chọn danh mục --</option>
+                                    </select>
+                                    <label for="categorySelect" class="text-success fw-semibold">
+                                        <i class="fas fa-list me-1"></i>Loại sân
+                                    </label>
+                                    <span asp-validation-for="CategoryId" class="text-danger small"></span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row mb-4">
+                            <div class="col-md-8">
+                                <div class="form-floating mb-3">
+                                    <input asp-for="Location" class="form-control border-2" id="locationInput" placeholder="Vị trí" style="border-radius: 15px; border-color: #28a745;" />
+                                    <label for="locationInput" class="text-success fw-semibold">
+                                        <i class="fas fa-map-marker-alt me-1"></i>Địa chỉ sân
+                                    </label>
+                                    <span asp-validation-for="Location" class="text-danger small"></span>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-floating mb-3">
+                                    <input asp-for="PricePerHour" class="form-control border-2" id="priceInput" type="number" step="0.01" placeholder="Giá" style="border-radius: 15px; border-color: #28a745;" />
+                                    <label for="priceInput" class="text-success fw-semibold">
+                                        <i class="fas fa-money-bill-wave me-1"></i>Giá/giờ (VNĐ)
+                                    </label>
+                                    <span asp-validation-for="PricePerHour" class="text-danger small"></span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Operating Hours -->
+                        <div class="section-header mb-4 mt-5">
+                            <h5 class="fw-bold text-success mb-3">
+                                <i class="fas fa-clock me-2"></i>Giờ hoạt động
+                            </h5>
+                        </div>
+
+                        <div class="row mb-4">
+                            <div class="col-md-6">
+                                <div class="form-floating mb-3">
+                                    <input type="time" name="operatingStartTime" class="form-control border-2" id="startTimeInput" value="06:00" required style="border-radius: 15px; border-color: #28a745;" />
+                                    <label for="startTimeInput" class="text-success fw-semibold">
+                                        <i class="fas fa-play me-1"></i>Giờ mở cửa
+                                    </label>
+                                    <span class="text-danger small" asp-validation-for="OperatingStartTime"></span>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-floating mb-3">
+                                    <input type="time" name="operatingEndTime" class="form-control border-2" id="endTimeInput" value="22:00" required style="border-radius: 15px; border-color: #28a745;" />
+                                    <label for="endTimeInput" class="text-success fw-semibold">
+                                        <i class="fas fa-stop me-1"></i>Giờ đóng cửa
+                                    </label>
+                                    <span class="text-danger small" asp-validation-for="OperatingEndTime"></span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Mô tả -->
+                        <div class="section-header mb-4 mt-5">
+                            <h5 class="fw-bold text-success mb-3">
+                                <i class="fas fa-edit me-2"></i>Mô tả sân
+                            </h5>
+                        </div>
+
+                        <div class="form-floating mb-4">
+                            <textarea asp-for="Cover" class="form-control border-2" id="coverTextarea" placeholder="Mô tả" style="border-radius: 15px; border-color: #28a745; min-height: 120px;"></textarea>
+                            <label for="coverTextarea" class="text-success fw-semibold">
+                                <i class="fas fa-align-left me-1"></i>Mô tả chi tiết về sân
+                            </label>
+                            <span asp-validation-for="Cover" class="text-danger small"></span>
+                        </div>
+
+                        <!-- Upload hình ảnh -->
+                        <div class="section-header mb-4 mt-5">
+                            <h5 class="fw-bold text-success mb-3">
+                                <i class="fas fa-camera me-2"></i>Hình ảnh sân
+                            </h5>
+                        </div>
+
+                        <div class="upload-area border-2 border-dashed p-4 text-center mb-4" style="border-color: #28a745 !important; border-radius: 15px; background: linear-gradient(45deg, rgba(40, 167, 69, 0.05), rgba(32, 201, 151, 0.05));">
+                            <div class="upload-icon mb-3">
+                                <i class="fas fa-cloud-upload-alt fa-3x text-success opacity-75"></i>
+                            </div>
+                            <h6 class="text-success fw-semibold mb-2">Tải lên hình ảnh sân</h6>
+                            <p class="text-muted mb-3">Kéo thả hoặc click để chọn nhiều hình ảnh</p>
+                            <input type="file" id="imageFiles" name="imageFiles" class="form-control d-none" multiple accept="image/*" />
+                            <button type="button" class="btn btn-outline-success rounded-pill px-4" onclick="document.getElementById('imageFiles').click();">
+                                <i class="fas fa-plus me-2"></i>Chọn hình ảnh
+                            </button>
+                            <small class="form-text text-muted d-block mt-2">Hỗ trợ: JPG, PNG, GIF. Tối đa 5MB mỗi file</small>
+                            @if (ViewData.ModelState["Images"]?.Errors?.Count > 0)
+                            {
+                                <div class="alert alert-danger mt-3 rounded-pill">
+                                    @foreach (var error in ViewData.ModelState["Images"].Errors)
+                                    {
+                                        <span><i class="fas fa-exclamation-triangle me-1"></i>@error.ErrorMessage</span>
+                                        <br />
+                                    }
+                                </div>
+                            }
+                        </div>
+
+                        <!-- Preview ảnh -->
+                        <div id="imagePreview" class="row g-3 mb-4"></div>
+
+                        <!-- Buttons -->
+                        <div class="d-flex justify-content-between align-items-center mt-5 pt-4" style="border-top: 2px solid #e9ecef;">
+                            <a asp-action="Index" class="btn btn-outline-secondary rounded-pill px-4 py-2">
+                                <i class="fas fa-arrow-left me-2"></i>Quay lại
+                            </a>
+                            <button type="submit" class="btn btn-success rounded-pill px-5 py-2 fw-semibold" style="background: linear-gradient(135deg, #28a745, #20c997); border: none; box-shadow: 0 4px 15px rgba(40, 167, 69, 0.3);">
+                                <i class="fas fa-plus-circle me-2"></i>Tạo sân mới
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // Form submission debug
+        document.querySelector('form').addEventListener('submit', function(e) {
+            console.log('Form submitted');
+            console.log('Name:', document.querySelector('[name="Name"]').value);
+            console.log('Location:', document.querySelector('[name="Location"]').value);
+            console.log('PricePerHour:', document.querySelector('[name="PricePerHour"]').value);
+            console.log('CategoryId:', document.querySelector('[name="CategoryId"]').value);
+            console.log('OperatingStartTime:', document.querySelector('[name="operatingStartTime"]').value);
+            console.log('OperatingEndTime:', document.querySelector('[name="operatingEndTime"]').value);
+
+            const fileInput = document.querySelector('[name="imageFiles"]');
+            console.log('Files selected:', fileInput.files.length);
+            for (let i = 0; i < fileInput.files.length; i++) {
+                console.log('File ' + i + ':', fileInput.files[i].name, fileInput.files[i].size);
+            }
+
+            // Show loading state
+            const submitBtn = e.target.querySelector('button[type="submit"]');
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Đang tạo...';
+            submitBtn.disabled = true;
+        });
+
+        // Image preview functionality
+        document.getElementById('imageFiles').addEventListener('change', function(e) {
+            const files = e.target.files;
+            console.log('Files changed:', files.length);
+
+            const previewContainer = document.getElementById('imagePreview');
+            previewContainer.innerHTML = '';
+
+            if (files.length > 0) {
+                // Show upload success message
+                const uploadArea = document.querySelector('.upload-area');
+                uploadArea.style.borderColor = '#28a745';
+                uploadArea.style.background = 'linear-gradient(45deg, rgba(40, 167, 69, 0.1), rgba(32, 201, 151, 0.1))';
+
+                for (let i = 0; i < files.length; i++) {
+                    const file = files[i];
+                    if (file.type.startsWith('image/')) {
+                        const reader = new FileReader();
+                        reader.onload = function(e) {
+                            const col = document.createElement('div');
+                            col.className = 'col-md-3 col-sm-4 col-6';
+
+                            col.innerHTML = `
+                                <div class="card border-0 shadow-sm" style="border-radius: 15px; overflow: hidden;">
+                                    <div class="position-relative">
+                                        <img src="${e.target.result}" class="card-img-top" style="height: 120px; object-fit: cover;">
+                                        <div class="position-absolute top-0 end-0 p-2">
+                                            <span class="badge bg-success rounded-pill">
+                                                <i class="fas fa-check"></i>
+                                            </span>
+                                        </div>
+                                    </div>
+                                    <div class="card-body p-2">
+                                        <small class="text-muted text-truncate d-block">${file.name}</small>
+                                        <small class="text-success">${(file.size / 1024 / 1024).toFixed(2)} MB</small>
+                                    </div>
+                                </div>
+                            `;
+                            previewContainer.appendChild(col);
+                        };
+                        reader.readAsDataURL(file);
+                    }
+                }
+            }
+        });
+
+        // Drag and drop functionality
+        const uploadArea = document.querySelector('.upload-area');
+
+        uploadArea.addEventListener('dragover', function(e) {
+            e.preventDefault();
+            uploadArea.style.borderColor = '#20c997';
+            uploadArea.style.background = 'linear-gradient(45deg, rgba(32, 201, 151, 0.1), rgba(40, 167, 69, 0.1))';
+        });
+
+        uploadArea.addEventListener('dragleave', function(e) {
+            e.preventDefault();
+            uploadArea.style.borderColor = '#28a745';
+            uploadArea.style.background = 'linear-gradient(45deg, rgba(40, 167, 69, 0.05), rgba(32, 201, 151, 0.05))';
+        });
+
+        uploadArea.addEventListener('drop', function(e) {
+            e.preventDefault();
+            uploadArea.style.borderColor = '#28a745';
+            uploadArea.style.background = 'linear-gradient(45deg, rgba(40, 167, 69, 0.05), rgba(32, 201, 151, 0.05))';
+
+            const files = e.dataTransfer.files;
+            document.getElementById('imageFiles').files = files;
+
+            // Trigger change event
+            const event = new Event('change', { bubbles: true });
+            document.getElementById('imageFiles').dispatchEvent(event);
+        });
+
+        // Form validation styling
+        document.querySelectorAll('.form-control, .form-select').forEach(function(element) {
+            element.addEventListener('blur', function() {
+                if (this.value.trim() !== '') {
+                    this.style.borderColor = '#28a745';
+                    this.style.boxShadow = '0 0 0 0.2rem rgba(40, 167, 69, 0.25)';
+                }
+            });
+        });
+
+        // Price formatting
+        document.getElementById('priceInput').addEventListener('input', function(e) {
+            let value = e.target.value.replace(/[^\d.]/g, '');
+            if (value) {
+                e.target.value = parseFloat(value).toLocaleString('vi-VN');
+            }
+        });
+    </script>
+}
+
+<style>
+    .section-header {
+        position: relative;
+        padding-left: 15px;
+    }
+
+        .section-header::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 4px;
+            height: 25px;
+            background: linear-gradient(135deg, #28a745, #20c997);
+            border-radius: 2px;
+        }
+
+    .form-floating > .form-control:focus,
+    .form-floating > .form-select:focus {
+        border-color: #28a745;
+        box-shadow: 0 0 0 0.2rem rgba(40, 167, 69, 0.25);
+    }
+
+    .form-floating > label {
+        color: #6c757d;
+    }
+
+    .upload-area {
+        transition: all 0.3s ease;
+        cursor: pointer;
+    }
+
+        .upload-area:hover {
+            border-color: #20c997 !important;
+            background: linear-gradient(45deg, rgba(32, 201, 151, 0.1), rgba(40, 167, 69, 0.1)) !important;
+        }
+
+    .btn-success {
+        transition: all 0.3s ease;
+    }
+
+        .btn-success:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(40, 167, 69, 0.4) !important;
+        }
+
+    .card {
+        transition: all 0.3s ease;
+    }
+</style>

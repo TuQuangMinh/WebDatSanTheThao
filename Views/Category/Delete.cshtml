@@ -1,0 +1,23 @@
+﻿@model web.Models.Category
+
+@{
+    ViewData["Title"] = "Xóa môn thể thao";
+}
+
+<h1>Xóa danh mục</h1>
+
+<h3>Bạn có chắc chắn muốn xóa danh mục này?</h3>
+<div>
+    <h4>@Model.Name</h4>
+    <hr />
+    <dl class="row">
+        <dt class="col-sm-2">Tên danh mục</dt>
+        <dd class="col-sm-10">@Model.Name</dd>
+    </dl>
+
+    <form asp-action="Delete">
+        <input type="hidden" asp-for="Id" />
+        <input type="submit" value="Xóa" class="btn btn-danger" /> |
+        <a asp-action="Index">Quay lại</a>
+    </form>
+</div>
