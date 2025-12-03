@@ -69,13 +69,13 @@ Hệ thống được tích hợp **ASP.NET Core Identity** nhằm hỗ trợ qu
 * **Frontend**: Razor Views, Bootstrap 5, jQuery
  ⚙️ 4. Cài đặt & chạy dự án
 
-### Yêu cầu hệ thống
+ Yêu cầu hệ thống
 
 * IDE: **Visual Studio 2022** hoặc **Rider**
 * **.NET 8.0 SDK**
 * **SQL Server**
 
-### Các bước chạy
+ Các bước chạy
 
 1. **Clone project** (ví dụ, thay bằng repo của bạn):
 
@@ -130,17 +130,10 @@ Bạn có thể chụp màn hình / quay video các trang sau:
 
 ---
 
-## 🔮 6. Hướng phát triển
+🔮 6. Hướng phát triển
 
 * ⏳ Tích hợp thêm **MoMo / ZaloPay** / các cổng thanh toán khác.
 * ⏳ **Responsive UI cho mobile**, tối ưu trải nghiệm đặt sân trên điện thoại.
 * ⏳ Hiển thị **lịch đặt sân dạng calendar** (FullCalendar hoặc custom) để người dùng xem nhanh giờ trống.
 * ⏳ Tính năng **đánh giá, review sân**, upload hình thực tế.
 * ⏳ Triển khai lên **Azure**, **Docker** hoặc hosting VPS.
-
----
-
-Nếu bạn muốn, ở bước tiếp theo mình có thể:
-
-* Đề xuất cụ thể **Models** cho `San`, `Booking`, `TimeSlot`, `Branch`…
-* Hoặc chuyển luôn **code từ Car → San / Booking** (đổi tên model, controller, view) từng bước cho bạn.
