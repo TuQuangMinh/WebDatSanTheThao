@@ -65,7 +65,6 @@ Hệ thống được tích hợp **ASP.NET Core Identity** nhằm hỗ trợ qu
 * **CSDL**: Microsoft SQL Server
 * **ORM**: Entity Framework Core (Code First)
 * **Authentication & Authorization**: ASP.NET Core Identity (User, Role, Claims)
-* **Thanh toán**: VNPay Payment Gateway (sandbox/test mode)
 * **Frontend**: Razor Views, Bootstrap 5, jQuery
  ⚙️ 4. Cài đặt & chạy dự án
 
